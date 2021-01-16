@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# cache
+Bike-Sharing/Bike-Sharing_cache/
+Bike-Sharing/Bike-Sharing_files/
