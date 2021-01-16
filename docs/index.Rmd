@@ -1,11 +1,17 @@
 ---
 title: "Machine Learning Projects"
-author: "Yu-En"
-date: "`r Sys.Date()`"
+author: "Yu-En Hsu"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+Last updated on `r Sys.Date()`.
+
+## Pages
+
++ [Bike Sharing](Bike-Sharing.html)
+
 
