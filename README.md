@@ -1,6 +1,3 @@
----
-output: html_document
----
 # Machine-Learning-Projects
 
 A collection of machine learning projects by Yu-En. All R Markdown files are rendered to HTML and is available at [https://yuenhsu.github.io/Machine-Learning-Projects/](https://yuenhsu.github.io/Machine-Learning-Projects/)
