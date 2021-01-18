@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, cache = TRUE, message = FALSE)
 ```
 
+The purpose of the markdown is to demonstrate how to use `dials` to manage and tune `parsnip` models. See [Dials, Tune, and Parsnip: Tidymodels’ Way to Create and Tune Model Parameters](https://towardsdatascience.com/dials-tune-and-parsnip-tidymodels-way-to-create-and-tune-model-parameters-c97ba31d6173) for more information.
+
 ## Import
 
 
@@ -213,6 +215,12 @@ dials_random_final %>%
 
 ---
 
-### Additional Information
+### Session Info
 
-* [Dials, Tune, and Parsnip: Tidymodels’ Way to Create and Tune Model Parameters](https://towardsdatascience.com/dials-tune-and-parsnip-tidymodels-way-to-create-and-tune-model-parameters-c97ba31d6173)
+```{r session_info}
+sessionInfo()
+```
+
+
+
+

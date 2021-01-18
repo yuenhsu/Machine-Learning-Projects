@@ -379,6 +379,7 @@ summary {
 </div>
 
 
+<p>The purpose of the markdown is to demonstrate how to use <code>dials</code> to manage and tune <code>parsnip</code> models. See <a href="https://towardsdatascience.com/dials-tune-and-parsnip-tidymodels-way-to-create-and-tune-model-parameters-c97ba31d6173">Dials, Tune, and Parsnip: Tidymodels’ Way to Create and Tune Model Parameters</a> for more information.</p>
 <div id="import" class="section level2">
 <h2>Import</h2>
 <pre class="r"><code>library(tidymodels)
@@ -955,11 +956,49 @@ dials_random_final %&gt;%
 ## 3 mae     standard     234.</code></pre>
 <hr />
 </div>
-<div id="additional-information" class="section level3">
-<h3>Additional Information</h3>
-<ul>
-<li><a href="https://towardsdatascience.com/dials-tune-and-parsnip-tidymodels-way-to-create-and-tune-model-parameters-c97ba31d6173">Dials, Tune, and Parsnip: Tidymodels’ Way to Create and Tune Model Parameters</a></li>
-</ul>
+<div id="session-info" class="section level3">
+<h3>Session Info</h3>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 4.0.2 (2020-06-22)
+## Platform: x86_64-apple-darwin17.0 (64-bit)
+## Running under: macOS  10.16
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] randomForest_4.6-14 vctrs_0.3.6         rlang_0.4.10       
+##  [4] moments_0.14        corrr_0.4.3         yardstick_0.0.7    
+##  [7] workflows_0.2.1     tune_0.1.2          tidyr_1.1.2        
+## [10] tibble_3.0.4        rsample_0.0.8       recipes_0.1.15     
+## [13] purrr_0.3.4         parsnip_0.1.4       modeldata_0.1.0    
+## [16] infer_0.5.3         ggplot2_3.3.3       dplyr_1.0.2        
+## [19] dials_0.0.9         scales_1.1.1        broom_0.7.3        
+## [22] tidymodels_0.1.2   
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.5         lubridate_1.7.9.2  lattice_0.20-41    listenv_0.8.0     
+##  [5] class_7.3-17       foreach_1.5.1      assertthat_0.2.1   digest_0.6.27     
+##  [9] ipred_0.9-9        parallelly_1.23.0  plyr_1.8.6         R6_2.5.0          
+## [13] backports_1.2.1    evaluate_0.14      pillar_1.4.7       rstudioapi_0.13   
+## [17] DiceDesign_1.8-1   furrr_0.2.1        rpart_4.1-15       Matrix_1.3-2      
+## [21] rmarkdown_2.6      splines_4.0.2      gower_0.2.2        stringr_1.4.0     
+## [25] munsell_0.5.0      compiler_4.0.2     xfun_0.20          pkgconfig_2.0.3   
+## [29] globals_0.14.0     htmltools_0.5.0    nnet_7.3-14        tidyselect_1.1.0  
+## [33] prodlim_2019.11.13 codetools_0.2-18   GPfit_1.0-8        fansi_0.4.1       
+## [37] future_1.21.0      crayon_1.3.4       withr_2.3.0        MASS_7.3-53       
+## [41] grid_4.0.2         gtable_0.3.0       lifecycle_0.2.0    magrittr_2.0.1    
+## [45] pROC_1.16.2        cli_2.2.0          stringi_1.5.3      timeDate_3043.102 
+## [49] ellipsis_0.3.1     lhs_1.1.1          generics_0.1.0     lava_1.6.8.1      
+## [53] iterators_1.0.13   tools_4.0.2        glue_1.4.2         parallel_4.0.2    
+## [57] survival_3.2-7     yaml_2.2.1         colorspace_2.0-0   knitr_1.30</code></pre>
 </div>
 </div>
 
