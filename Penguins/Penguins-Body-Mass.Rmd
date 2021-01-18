@@ -1,0 +1,189 @@
+---
+title: "Penguins"
+author: "Yu-En"
+date: "13/01/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, cache = TRUE, message = FALSE)
+```
+
+## Import
+
+
+```{r import}
+library(tidymodels)
+library(corrr)
+library(moments)
+data("penguins")
+head(penguins)
+penguins %>% glimpse()
+penguins %>% skimr::skim()
+penguins <- penguins %>%
+  select(-island) %>%
+  drop_na()
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r split_data}
+set.seed(300)
+split <- initial_split(penguins, prop = 0.75)
+penguins_train <- training(split)
+penguins_test <- testing(split)
+folds_5 <- vfold_cv(penguins_train, v = 5, repeats = 2)
+```
+
+```{r}
+show_engines("rand_forest")
+show_model_info("rand_forest")
+```
+
+
+```{r model_def}
+rf_spec <- 
+  rand_forest(mode = "regression") %>%
+  set_engine("randomForest")
+
+model_default <-
+  rf_spec %>%
+  fit(body_mass_g~., data = penguins_train)
+
+model_default
+model_default %>% 
+  predict(penguins_test) %>% 
+  bind_cols(penguins_test) %>% 
+  metrics(body_mass_g, .pred)
+```
+
+```{r model_tune1}
+rf_spec <-
+  rf_spec %>%
+  update(mtry = tune(), trees = tune())
+
+rf_workflow <-
+  workflow() %>%
+  add_variables(outcomes = body_mass_g, predictors = everything()) %>%
+  add_model(rf_spec)
+
+manual_grid <-
+  expand.grid(mtry = c(1, 3, 5), trees = c(500, 1000, 2000))
+
+set.seed(300)
+manual_tune <-
+  rf_workflow %>%
+  tune_grid(resamples = folds_5, grid = manual_grid)
+collect_metrics(manual_tune)
+show_best(manual_tune, n = 1)
+
+manual_final <-
+  finalize_workflow(rf_workflow, select_best(manual_tune)) %>%
+  fit(penguins_train)
+
+manual_final %>% 
+  predict(penguins_test) %>% 
+  bind_cols(penguins_test) %>% 
+  metrics(body_mass_g, .pred)
+```
+
+```{r model_tune2}
+set.seed(300)
+random_tune <-
+  rf_workflow %>%
+  tune_grid(
+    resamples = folds_5, grid = 5
+  )
+collect_metrics(random_tune)
+show_best(random_tune, n = 1)
+
+random_final <-
+  finalize_workflow(rf_workflow, select_best(random_tune)) %>%
+  fit(penguins_train)
+
+random_final %>% 
+  predict(penguins_test) %>% 
+  bind_cols(penguins_test) %>% 
+  metrics(body_mass_g, .pred)
+```
+
+```{r model_tune3, collapse=TRUE}
+mtry()
+
+mtry() %>% range_get()
+
+mtry() %>% range_set(c(1, ncol(penguins_train) - 1))
+
+mtry(c(1, ncol(penguins_train) - 1))
+
+cost_complexity()
+
+trees()
+
+set.seed(300)
+trees() %>% value_seq(n = 4)
+
+trees() %>% value_seq(n = 5)
+
+trees() %>% value_seq(n = 10)
+
+set.seed(300)
+trees() %>% value_sample(n = 4)
+
+trees() %>% value_sample(n = 5)
+
+trees() %>% value_sample(n = 10)
+
+set.seed(300)
+dials_regular <- grid_regular(
+  mtry(c(1, ncol(penguins_train) - 1)),
+  trees(),
+  levels = 3
+)
+dials_regular
+
+set.seed(300)
+dials_random <- grid_random(
+  mtry(c(1, ncol(penguins_train) - 1)),
+  trees(),
+  size = 6
+)
+dials_random
+
+dials_regular_tune <-
+  rf_workflow %>%
+  tune_grid(
+    resamples = folds_5, grid = dials_regular
+  )
+collect_metrics(dials_regular_tune)
+show_best(dials_regular_tune, n = 1)
+
+dials_regular_final <-
+  finalize_workflow(rf_workflow, select_best(dials_regular_tune)) %>%
+  fit(penguins_train)
+
+dials_regular_final %>% 
+  predict(penguins_test) %>% 
+  bind_cols(penguins_test) %>% 
+  metrics(body_mass_g, .pred)
+
+dials_random_tune <-
+  rf_workflow %>%
+  tune_grid(
+    resamples = folds_5, grid = dials_random
+  )
+collect_metrics(dials_random_tune)
+show_best(dials_random_tune, n = 1)
+
+dials_random_final <-
+  finalize_workflow(rf_workflow, select_best(dials_random_tune)) %>%
+  fit(penguins_train)
+
+dials_random_final %>% 
+  predict(penguins_test) %>% 
+  bind_cols(penguins_test) %>% 
+  metrics(body_mass_g, .pred)
+```
+
