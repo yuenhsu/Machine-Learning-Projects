@@ -562,14 +562,16 @@ head(penguins)</code></pre>
   select(-island) %&gt;%
   drop_na()</code></pre>
 </div>
-<div id="including-plots" class="section level2">
-<h2>Including Plots</h2>
-<p>You can also embed plots, for example:</p>
+<div id="split-data" class="section level2">
+<h2>Split Data</h2>
 <pre class="r"><code>set.seed(300)
 split &lt;- initial_split(penguins, prop = 0.75)
 penguins_train &lt;- training(split)
 penguins_test &lt;- testing(split)
 folds_5 &lt;- vfold_cv(penguins_train, v = 5, repeats = 2)</code></pre>
+</div>
+<div id="show-random-forest-engine" class="section level2">
+<h2>Show Random Forest Engine</h2>
 <pre class="r"><code>show_engines(&quot;rand_forest&quot;)</code></pre>
 <pre><code>## # A tibble: 6 x 2
 ##   engine       mode          
@@ -619,6 +621,12 @@ folds_5 &lt;- vfold_cv(penguins_train, v = 5, repeats = 2)</code></pre>
 ##        regression randomForest               numeric, raw
 ##        regression       ranger     conf_int, numeric, raw
 ##        regression        spark                    numeric</code></pre>
+</div>
+<div id="tune-parameters" class="section level2">
+<h2>Tune Parameters</h2>
+<div id="use-default-parameters-in-parsnip" class="section level3">
+<h3>1. Use default parameters in <code>parsnip</code></h3>
+<p><code>rf_spec</code> is a random forest model specification created with <code>parsnip</code>. I do not specify values for any parameters, resulting in using the default values. As always, I then fit the model on the training data. The default parameters are printed.</p>
 <pre class="r"><code>rf_spec &lt;- 
   rand_forest(mode = &quot;regression&quot;) %&gt;%
   set_engine(&quot;randomForest&quot;)
@@ -650,24 +658,35 @@ model_default</code></pre>
 ## 1 rmse    standard     317.   
 ## 2 rsq     standard       0.877
 ## 3 mae     standard     242.</code></pre>
-<pre class="r"><code>rf_spec &lt;-
+</div>
+<div id="use-tune-to-tune-parsnip-model" class="section level3">
+<h3>2. Use <code>tune</code> to tune <code>parsnip</code> model</h3>
+<div id="manually-provide-values" class="section level4">
+<h4>2.1. Manually provide values</h4>
+<pre class="r"><code># Update model specification
+rf_spec &lt;-
   rf_spec %&gt;%
   update(mtry = tune(), trees = tune())
 
+# Create workflow
 rf_workflow &lt;-
   workflow() %&gt;%
   add_variables(outcomes = body_mass_g, predictors = everything()) %&gt;%
   add_model(rf_spec)
 
+# Put parameters in a grid
 manual_grid &lt;-
   expand.grid(mtry = c(1, 3, 5), trees = c(500, 1000, 2000))
 
+# Tune
 set.seed(300)
 manual_tune &lt;-
   rf_workflow %&gt;%
   tune_grid(resamples = folds_5, grid = manual_grid)
-collect_metrics(manual_tune)</code></pre>
-<pre><code>## # A tibble: 18 x 8
+
+# Show all results
+collect_metrics(manual_tune)
+## # A tibble: 18 x 8
 ##     mtry trees .metric .estimator    mean     n std_err .config             
 ##    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
 ##  1     1   500 rmse    standard   306.       10  9.84   Preprocessor1_Model1
@@ -687,34 +706,42 @@ collect_metrics(manual_tune)</code></pre>
 ## 15     3  2000 rmse    standard   300.       10 14.5    Preprocessor1_Model8
 ## 16     3  2000 rsq     standard     0.854    10  0.0179 Preprocessor1_Model8
 ## 17     5  2000 rmse    standard   304.       10 14.7    Preprocessor1_Model9
-## 18     5  2000 rsq     standard     0.851    10  0.0181 Preprocessor1_Model9</code></pre>
-<pre class="r"><code>show_best(manual_tune, n = 1)</code></pre>
-<pre><code>## # A tibble: 1 x 8
+## 18     5  2000 rsq     standard     0.851    10  0.0181 Preprocessor1_Model9
+
+# Show the best one
+show_best(manual_tune, n = 1)
+## # A tibble: 1 x 8
 ##    mtry trees .metric .estimator  mean     n std_err .config             
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-## 1     3  2000 rmse    standard    300.    10    14.5 Preprocessor1_Model8</code></pre>
-<pre class="r"><code>manual_final &lt;-
+## 1     3  2000 rmse    standard    300.    10    14.5 Preprocessor1_Model8
+
+# Finalise
+manual_final &lt;-
   finalize_workflow(rf_workflow, select_best(manual_tune)) %&gt;%
   fit(penguins_train)
 
+# Predict on testing data
 manual_final %&gt;% 
   predict(penguins_test) %&gt;% 
   bind_cols(penguins_test) %&gt;% 
-  metrics(body_mass_g, .pred)</code></pre>
-<pre><code>## # A tibble: 3 x 3
+  metrics(body_mass_g, .pred)
+## # A tibble: 3 x 3
 ##   .metric .estimator .estimate
 ##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
 ## 1 rmse    standard     296.   
 ## 2 rsq     standard       0.881
 ## 3 mae     standard     238.</code></pre>
+</div>
+<div id="specify-grid-size-for-automatic-generation" class="section level4">
+<h4>2.2. Specify grid size for automatic generation</h4>
 <pre class="r"><code>set.seed(300)
 random_tune &lt;-
   rf_workflow %&gt;%
   tune_grid(
     resamples = folds_5, grid = 5
   )
-collect_metrics(random_tune)</code></pre>
-<pre><code>## # A tibble: 10 x 8
+collect_metrics(random_tune)
+## # A tibble: 10 x 8
 ##     mtry trees .metric .estimator    mean     n std_err .config             
 ##    &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
 ##  1     5  1879 rmse    standard   304.       10 14.5    Preprocessor1_Model1
@@ -726,26 +753,32 @@ collect_metrics(random_tune)</code></pre>
 ##  7     2   812 rmse    standard   297.       10 13.7    Preprocessor1_Model4
 ##  8     2   812 rsq     standard     0.858    10  0.0171 Preprocessor1_Model4
 ##  9     4   193 rmse    standard   302.       10 14.9    Preprocessor1_Model5
-## 10     4   193 rsq     standard     0.852    10  0.0182 Preprocessor1_Model5</code></pre>
-<pre class="r"><code>show_best(random_tune, n = 1)</code></pre>
-<pre><code>## # A tibble: 1 x 8
+## 10     4   193 rsq     standard     0.852    10  0.0182 Preprocessor1_Model5
+
+show_best(random_tune, n = 1)
+## # A tibble: 1 x 8
 ##    mtry trees .metric .estimator  mean     n std_err .config             
 ##   &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-## 1     2   812 rmse    standard    297.    10    13.7 Preprocessor1_Model4</code></pre>
-<pre class="r"><code>random_final &lt;-
+## 1     2   812 rmse    standard    297.    10    13.7 Preprocessor1_Model4
+
+random_final &lt;-
   finalize_workflow(rf_workflow, select_best(random_tune)) %&gt;%
   fit(penguins_train)
 
 random_final %&gt;% 
   predict(penguins_test) %&gt;% 
   bind_cols(penguins_test) %&gt;% 
-  metrics(body_mass_g, .pred)</code></pre>
-<pre><code>## # A tibble: 3 x 3
+  metrics(body_mass_g, .pred)
+## # A tibble: 3 x 3
 ##   .metric .estimator .estimate
 ##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
 ## 1 rmse    standard     295.   
 ## 2 rsq     standard       0.883
 ## 3 mae     standard     233.</code></pre>
+</div>
+</div>
+<div id="create-parameter-values-with-dials" class="section level3">
+<h3>3. Create parameter values with <code>dials</code></h3>
 <pre class="r"><code>mtry()
 ## # Randomly Selected Predictors (quantitative)
 ## Range: [1, ?]
@@ -920,6 +953,14 @@ dials_random_final %&gt;%
 ## 1 rmse    standard     296.   
 ## 2 rsq     standard       0.882
 ## 3 mae     standard     234.</code></pre>
+<hr />
+</div>
+<div id="additional-information" class="section level3">
+<h3>Additional Information</h3>
+<ul>
+<li><a href="https://towardsdatascience.com/dials-tune-and-parsnip-tidymodels-way-to-create-and-tune-model-parameters-c97ba31d6173">Dials, Tune, and Parsnip: Tidymodels’ Way to Create and Tune Model Parameters</a></li>
+</ul>
+</div>
 </div>
 
 
